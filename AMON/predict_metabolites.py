@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn2, venn2_circles, venn3, venn3_circles
 from scipy.stats import hypergeom
-from os import path, makedirs
+from os import path
 from statsmodels.sandbox.stats.multicomp import multipletests
 import numpy as np
 from biom import load_table
@@ -10,6 +10,7 @@ import seaborn as sns
 import json
 from collections import defaultdict, OrderedDict
 from datetime import datetime
+import sys
 
 from KEGG_parser.parsers import parse_ko, parse_rn, parse_co, parse_pathway
 from KEGG_parser.downloader import get_kegg_record_dict
@@ -265,8 +266,7 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
          keep_separated=False, samples_are_columns=False, detected_only=False, rxn_compounds_only=False,
          unique_only=True, ko_file_loc=None, rn_file_loc=None, co_file_loc=None, pathway_file_loc=None,
          write_json=False):
-    # create output dir to throw error quick
-    makedirs(output_dir)
+    # set up log file
     logger = Logger(path.join(output_dir, "AMON_log.txt"))
 
     ## check if input is KO or EC
