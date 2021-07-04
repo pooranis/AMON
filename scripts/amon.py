@@ -9,9 +9,11 @@ if __name__ == '__main__':
     # Primary inputs
     parser.add_argument('-i', '--gene_set', help="KEGG KO's from bacterial community or organism of interest in the "
                                                  "form of a white space separated list, a tsv or csv with KO ids as "
-                                                 "column names or a biom file with KO ids as observations",
+                                                 "column names or a biom file with KO ids as observations. REQUIRED",
                         required=True)
-    parser.add_argument('-o', '--output_dir', help="directory to store output", required=True)
+    parser.add_argument('-o', '--output_dir', help="directory to store output. REQUIRED", required=True)
+    parser.add_argument('-e', '--ec_numbers', help="Instead of KEGG KO's, the 'gene_set' input files consist of "
+                                                   "KEGG EC numbers in the same format", action='store_true')
     parser.add_argument('--detected_compounds', help="list of compounds detected via metabolomics")
     parser.add_argument('--other_gene_set', help="white space separated list of KEGG KO's from the host, another "
                                                  "organism or other environment")
@@ -35,6 +37,7 @@ if __name__ == '__main__':
                         action='store_true', default=False)
     # Local KEGG files
     parser.add_argument('--ko_file_loc', help='Location of ko file from KEGG FTP download')
+    parser.add_argument('--ec_file_loc', help='Location of ec file from KEGG FTP download')
     parser.add_argument('--rn_file_loc', help='Location of reaction file from KEGG FTP download')
     parser.add_argument('--co_file_loc', help='Location of compound file from KEGG FTP download')
     parser.add_argument('--pathway_file_loc', help='Location of pathway file from KEGG FTP download')
@@ -44,6 +47,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     kos_loc = args.gene_set
     output_dir = args.output_dir
+    ec_numbers = args.ec_numbers
     detected_compounds = args.detected_compounds
     other_kos_loc = args.other_gene_set
     if args.gene_set_name is None:
@@ -63,6 +67,7 @@ if __name__ == '__main__':
     unique_only = args.unique_only
 
     ko_file_loc = args.ko_file_loc
+    if ec_numbers: ko_file_loc = args.ec_file_loc 
     rn_file_loc = args.rn_file_loc
     co_file_loc = args.co_file_loc
     pathway_file_loc = args.pathway_file_loc
@@ -71,6 +76,6 @@ if __name__ == '__main__':
     if detected_compounds_only and detected_compounds is None:
         raise ValueError('Cannot have detected compounds only and not provide detected compounds')
 
-    main(kos_loc, output_dir, other_kos_loc, detected_compounds, name1, name2, keep_separated, samples_are_columns,
-         detected_compounds_only, rn_compounds_only, unique_only, ko_file_loc=ko_file_loc, rn_file_loc=rn_file_loc,
-         co_file_loc=co_file_loc, pathway_file_loc=pathway_file_loc, write_json=write_json)
+    main(kos_loc, output_dir, ec_numbers, other_kos_loc, detected_compounds, name1, name2, keep_separated, samples_are_columns,
+         detected_compounds_only, rn_compounds_only, unique_only, ko_file_loc=ko_file_loc,
+         rn_file_loc=rn_file_loc, co_file_loc=co_file_loc, pathway_file_loc=pathway_file_loc, write_json=write_json)

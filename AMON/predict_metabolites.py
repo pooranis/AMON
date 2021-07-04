@@ -13,6 +13,7 @@ from datetime import datetime
 
 from KEGG_parser.parsers import parse_ko, parse_rn, parse_co, parse_pathway
 from KEGG_parser.downloader import get_kegg_record_dict
+from .parse_ecs import parse_ec, get_rns_from_ecs
 
 sns.set()
 
@@ -260,7 +261,7 @@ def make_enrichment_clustermap(pathway_enrichment_dfs: dict, key, output_loc, mi
     plt.savefig(output_loc, dpi=500, bbox_inches='tight')
 
 
-def main(kos_loc, output_dir, other_kos_loc=None, compounds_loc=None, name1='gene_set_1', name2='gene_set_2',
+def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_loc=None, name1='gene_set_1', name2='gene_set_2',
          keep_separated=False, samples_are_columns=False, detected_only=False, rxn_compounds_only=False,
          unique_only=True, ko_file_loc=None, rn_file_loc=None, co_file_loc=None, pathway_file_loc=None,
          write_json=False):
@@ -268,25 +269,37 @@ def main(kos_loc, output_dir, other_kos_loc=None, compounds_loc=None, name1='gen
     makedirs(output_dir)
     logger = Logger(path.join(output_dir, "AMON_log.txt"))
 
+    ## check if input is KO or EC
+    if ec_numbers:
+        logger['EC numbers?'] = ec_numbers
+        parse_first = parse_ec
+        get_rns = get_rns_from_ecs
+        abr = "ec"
+    else:
+        parse_first = parse_ko
+        get_rns = get_rns_from_kos
+        abr = "ko"
+
     # read in all kos and get records
     sample_kos = read_in_ids(kos_loc, keep_separated=keep_separated,
                              samples_are_columns=samples_are_columns, name=name1)
-    logger['kos_loc'] = path.abspath(kos_loc)
+    logger[abr + 's_loc'] = path.abspath(kos_loc)
+
     if other_kos_loc is not None:
         sample_kos.update(read_in_ids(other_kos_loc, keep_separated=keep_separated,
                                       samples_are_columns=samples_are_columns, name=name2))
-        logger['other_kos_loc'] = path.abspath(other_kos_loc)
+        logger['other_' + abr + 's_loc'] = path.abspath(other_kos_loc)
     all_kos = set([value for values in sample_kos.values() for value in values])
     logger['Number of samples'] = len(sample_kos)
-    logger['Total number of KOs'] = len(all_kos)
+    logger['Total number of ' + abr.upper()] = len(all_kos)
 
-    ko_dict = get_kegg_record_dict(set(all_kos), parse_ko, ko_file_loc)
+    ko_dict = get_kegg_record_dict(set(all_kos), parse_first, ko_file_loc)
     if write_json:
-        open(path.join(output_dir, 'ko_dict.json'), 'w').write(json.dumps(ko_dict))
-        logger['KO json location'] = path.abspath(path.join(output_dir, 'ko_dict.json'))
+        open(path.join(output_dir, abr + '_dict.json'), 'w').write(json.dumps(ko_dict))
+        logger[abr.upper() + ' json location'] = path.abspath(path.join(output_dir, abr + '_dict.json'))
 
     # get all reactions from kos
-    sample_rns = get_rns_from_kos(sample_kos, ko_dict)
+    sample_rns = get_rns(sample_kos, ko_dict)
     all_rns = set([value for values in sample_rns.values() for value in values])
     logger['Total number of reactions'] = len(all_rns)
 
