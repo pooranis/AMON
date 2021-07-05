@@ -89,6 +89,9 @@ optional arguments:
                         interest in the form of a white space separated list,
                         a tsv or csv with KO ids as column names or a biom
                         file with KO ids as observations (default: None)
+  -e, --ec_numbers      Instead of KEGG KO's, the 'gene_set' input file
+                        consists of KEGG EC numbers in the same format
+                        (default: False)
   -o OUTPUT_DIR, --output_dir OUTPUT_DIR
                         directory to store output (default: None)
   --detected_compounds DETECTED_COMPOUNDS
@@ -104,6 +107,8 @@ optional arguments:
   --ko_file_loc KO_FILE_LOC
                         Location of ko file from KEGG FTP download (default:
                         None)
+  --ec_file_loc EC_FILE_LOC
+                        Location of ec file from KEGG FTP download (default: None)
   --rn_file_loc RN_FILE_LOC
                         Location of reaction file from KEGG FTP download
                         (default: None)
@@ -115,6 +120,7 @@ optional arguments:
                         (default: None)
   --save_entries        Save json file of KEGG entries at all levels used in
                         analysis for deeper analysis (default: False)
-  --verbose             verbose output (default: False)
+  --overwrite           overwrite output directory if it exists (default:
+                        False)
 
 ```
