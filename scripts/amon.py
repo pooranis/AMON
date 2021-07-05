@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-import os
 from AMON.predict_metabolites import main
 
 if __name__ == '__main__':
@@ -28,8 +27,6 @@ if __name__ == '__main__':
     parser.add_argument('--samples_are_columns', help='If data is in tabular format, by default genes are columns and '
                                                       'samples rows, to indicate that samples are columns and genes '
                                                       'are rows use this flag', action='store_true', default=False)
-    parser.add_argument('--overwrite', help='overwrite output directory if it exists',
-                        action='store_true')
     # Filters
     parser.add_argument('--detected_only', help="only use detected compounds in enrichment analysis",
                         action='store_true', default=False)
@@ -45,6 +42,8 @@ if __name__ == '__main__':
     parser.add_argument('--pathway_file_loc', help='Location of pathway file from KEGG FTP download')
     parser.add_argument('--save_entries', help='Save json file of KEGG entries at all levels used in analysis for '
                                                'deeper analysis', action='store_true', default=False)
+    parser.add_argument('--overwrite', help='overwrite output directory if it exists',
+                        action='store_true')
 
     args = parser.parse_args()
     kos_loc = args.gene_set
@@ -78,9 +77,18 @@ if __name__ == '__main__':
     if detected_compounds_only and detected_compounds is None:
         raise ValueError('Cannot have detected compounds only and not provide detected compounds')
 
-    # create output dir to throw error quick
-    os.makedirs(output_dir, exist_ok=args.overwrite)
+    main(kos_loc, output_dir, ec_numbers, other_kos_loc, compounds_loc=detected_compounds,
+         name1=name1, name2=name2,
+         keep_separated=keep_separated,
+         samples_are_columns=samples_are_columns,
+         detected_only=detected_compounds_only,
+         rxn_compounds_only=rn_compounds_only,
+         unique_only=unique_only,
+         ko_file_loc=ko_file_loc,
+         rn_file_loc=rn_file_loc,
+         co_file_loc=co_file_loc,
+         pathway_file_loc=pathway_file_loc,
+         write_json=write_json,
+         overwrite=args.overwrite)
 
-    main(kos_loc, output_dir, ec_numbers, other_kos_loc, detected_compounds, name1, name2, keep_separated, samples_are_columns,
-         detected_compounds_only, rn_compounds_only, unique_only, ko_file_loc=ko_file_loc,
-         rn_file_loc=rn_file_loc, co_file_loc=co_file_loc, pathway_file_loc=pathway_file_loc, write_json=write_json)
+

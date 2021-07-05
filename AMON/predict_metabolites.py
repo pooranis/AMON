@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn2, venn2_circles, venn3, venn3_circles
 from scipy.stats import hypergeom
-from os import path
+from os import path, makedirs
 from statsmodels.sandbox.stats.multicomp import multipletests
 import numpy as np
 from biom import load_table
@@ -265,8 +265,9 @@ def make_enrichment_clustermap(pathway_enrichment_dfs: dict, key, output_loc, mi
 def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_loc=None, name1='gene_set_1', name2='gene_set_2',
          keep_separated=False, samples_are_columns=False, detected_only=False, rxn_compounds_only=False,
          unique_only=True, ko_file_loc=None, rn_file_loc=None, co_file_loc=None, pathway_file_loc=None,
-         write_json=False):
-    # set up log file
+         write_json=False, overwrite=False):
+    # create output dir to throw error quick
+    makedirs(output_dir, exist_ok=overwrite)
     logger = Logger(path.join(output_dir, "AMON_log.txt"))
 
     ## check if input is KO or EC
