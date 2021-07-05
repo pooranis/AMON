@@ -16,9 +16,16 @@ conda activate AMON
 ```
 
 Then it can be installed via pip.
-```bash
-pip install AMON-bio
-```
+
+- To install the [original version from pypi](https://pypi.org/project/AMON-bio/):
+  ```bash
+  pip install AMON-bio
+  ```
+
+- To install this fork:
+  ```bash
+  python -m pip install git+https://github.com/pooranis/AMON.git@main
+  ```
 
 ### Alternative installation
 Alternatively AMON can be installed from pip directly.
