@@ -6,7 +6,7 @@ A command line tool for predicting the compounds produced by microbes and the ho
 ## Installation
 It is recommended to install AMON in a conda environment. The environment can be created by first downloading the environment file.
 ```bash
-wget https://raw.githubusercontent.com/shafferm/AMON/master/environment.yaml
+wget https://raw.githubusercontent.com/pooranis/AMON/master/environment.yaml
 ```
 
 Then create a new conda environment. Using the environment file and activate it.
