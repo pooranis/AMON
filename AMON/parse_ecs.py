@@ -66,11 +66,13 @@ def parse_ec(ec_raw_record):
     return ec_dict
 
 
-def get_rns_from_ec_dict(ec_dict: dict):
-    """get set of reactions from all ecs in dictionary output by
-    `KEGG_parser.downloader.get_kegg_record_dict`
+def get_rns_from_ec_dict(ec_dict: dict, list_of_ecs=None):
+    """get unique list of reactions from ecs in dictionary output by
+    `KEGG_parser.downloader.get_kegg_record_dict` that are in
+    *list_of_ecs* or all if *list_of_ecs* is None.
     """
-    list_of_ecs = ec_dict.keys()
+    if not list_of_ecs:
+        list_of_ecs = ec_dict.keys()
     rns = set()
     for ec in list_of_ecs:
         try:
@@ -79,23 +81,15 @@ def get_rns_from_ec_dict(ec_dict: dict):
                 rns.update(ec_record["ALL_REAC"])
         except KeyError:
             pass
-    return rns
+    return list(rns)
 
 
 def get_rns_from_ecs(dict_of_ecs: dict, ec_dict: dict):
     """get reactions from dictionary of ec records *ec_dict* output by
     `KEGG_parser.downloader.get_kegg_record_dict` limited to those
-    ecs in *dict_of_ecs*
+    ecs in samples in *dict_of_ecs*
     """
     sample_rns = dict()
     for sample, list_of_ecs in dict_of_ecs.items():
-        reaction_set = list()
-        for ec in list_of_ecs:
-            try:
-                ec_record = ec_dict[ec]
-                if "ALL_REAC" in ec_record:
-                    reaction_set += ec_record["ALL_REAC"]
-            except KeyError:
-                pass
-        sample_rns[sample] = reaction_set
+        sample_rns[sample] = get_rns_from_ec_dict(ec_dict, list_of_ecs)
     return sample_rns
