@@ -24,7 +24,7 @@ sns.set()
 class Logger:
     """"""
     def __init__(self, output):
-        self.output_file = open(output, mode='w')
+        self.output_file = open(output, mode='a')
         atexit.register(self.output_file.close)
         self.start_time = datetime.now()
         self.logv('start time', self.start_time)
