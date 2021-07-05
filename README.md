@@ -81,13 +81,17 @@ When the `other_gene_set` and/or `detected_compounds` parameters are given a ven
 #### Full help
 ```
 amon.py --help
-usage: amon.py [-h] -i GENE_SET -o OUTPUT_DIR
+usage: amon.py [-h] -i GENE_SET -o OUTPUT_DIR [-e]
                [--detected_compounds DETECTED_COMPOUNDS]
-               [--other_gene_set OTHER_GENE_SET] [--detected_only]
-               [--rn_compound_only] [--ko_file_loc KO_FILE_LOC]
+               [--other_gene_set OTHER_GENE_SET]
+               [--gene_set_name GENE_SET_NAME]
+               [--other_gene_set_name OTHER_GENE_SET_NAME]
+               [--keep_separated] [--samples_are_columns] [--detected_only]
+               [--rn_compound_only] [--unique_only]
+               [--ko_file_loc KO_FILE_LOC] [--ec_file_loc EC_FILE_LOC]
                [--rn_file_loc RN_FILE_LOC] [--co_file_loc CO_FILE_LOC]
                [--pathway_file_loc PATHWAY_FILE_LOC] [--save_entries]
-               [--verbose]
+               [--overwrite]
 
 optional arguments:
   -h, --help            show this help message and exit
