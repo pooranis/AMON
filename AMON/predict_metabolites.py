@@ -10,7 +10,7 @@ import seaborn as sns
 import json
 from collections import defaultdict, OrderedDict
 from datetime import datetime
-import sys
+import atexit
 
 from KEGG_parser.parsers import parse_ko, parse_rn, parse_co, parse_pathway
 from KEGG_parser.downloader import get_kegg_record_dict
@@ -21,19 +21,23 @@ sns.set()
 # TODO: take multiple files
 
 
-class Logger(OrderedDict):
+class Logger:
     """"""
     def __init__(self, output):
-        super(Logger, self).__init__()
-        self.output_file = output
-        self['start time'] = datetime.now()
+        self.output_file = open(output, mode='w')
+        atexit.register(self.output_file.close)
+        self.start_time = datetime.now()
+        self.logv('start time', self.start_time)
 
-    def output_log(self):
-        with open(self.output_file, 'w') as f:
-            self['finish time'] = datetime.now()
-            self['elapsed time'] = self['finish time'] - self['start time']
-            for key, value in self.items():
-                f.write(key + ': ' + str(value) + '\n')
+    def logv(self, key: str, value):
+        """log a key, value pair"""
+        print(key + ': ' + str(value), file=self.output_file, flush=True)
+    
+    def end_log(self):
+        """record finish time and elapsed time to log"""
+        finish_time = datetime.now()
+        self.logv('finish time', finish_time)
+        self.logv('elapsed time', finish_time - self.start_time)
 
 
 def p_adjust(pvalues, method='fdr_bh'):
@@ -76,7 +80,7 @@ def read_in_ids(file_loc, keep_separated=False, samples_are_columns=False, name=
         id_table.filter(ids_to_keep, axis='observation', inplace=True)
         return {name: set(id_table.ids(axis='observation'))}
     else:
-        raise ValueError('Input file %s does not have a parsable file ending.')
+        raise ValueError('Input file {} does not have a parsable file ending.'.format(file_loc))
 
 
 def get_rns_from_kos(dict_of_kos: dict, ko_dict: dict):
@@ -272,7 +276,7 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
 
     ## check if input is KO or EC
     if ec_numbers:
-        logger['EC numbers?'] = ec_numbers
+        logger.logv('EC numbers?', ec_numbers)
         parse_first = parse_ec
         get_rns = get_rns_from_ecs
         abr = "ec"
@@ -284,31 +288,34 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
     # read in all kos and get records
     sample_kos = read_in_ids(kos_loc, keep_separated=keep_separated,
                              samples_are_columns=samples_are_columns, name=name1)
-    logger[abr + 's_loc'] = path.abspath(kos_loc)
+
+    logger.logv(abr + 's_loc', path.abspath(kos_loc))
 
     if other_kos_loc is not None:
         sample_kos.update(read_in_ids(other_kos_loc, keep_separated=keep_separated,
                                       samples_are_columns=samples_are_columns, name=name2))
-        logger['other_' + abr + 's_loc'] = path.abspath(other_kos_loc)
+        logger.logv('other_' + abr + 's_loc', path.abspath(other_kos_loc))
     all_kos = set([value for values in sample_kos.values() for value in values])
-    logger['Number of samples'] = len(sample_kos)
-    logger['Total number of ' + abr.upper()] = len(all_kos)
+    logger.logv('Number of samples', len(sample_kos))
+    logger.logv('Total number of ' + abr.upper(), len(all_kos))
 
     ko_dict = get_kegg_record_dict(set(all_kos), parse_first, ko_file_loc)
     if write_json:
-        open(path.join(output_dir, abr + '_dict.json'), 'w').write(json.dumps(ko_dict))
-        logger[abr.upper() + ' json location'] = path.abspath(path.join(output_dir, abr + '_dict.json'))
+        with open(path.join(output_dir, abr + '_dict.json'), 'w') as f:
+            f.write(json.dumps(ko_dict))
+            logger.logv(abr.upper() + ' json location', path.abspath(f.name))
 
     # get all reactions from kos
     sample_rns = get_rns(sample_kos, ko_dict)
     all_rns = set([value for values in sample_rns.values() for value in values])
-    logger['Total number of reactions'] = len(all_rns)
+    logger.logv('Total number of reactions', len(all_rns))
 
     # get reactions from kegg
     rn_dict = get_kegg_record_dict(set(all_rns), parse_rn, rn_file_loc)
     if write_json:
-        open(path.join(output_dir, 'rn_dict.json'), 'w').write(json.dumps(rn_dict))
-        logger['RN json location'] = path.abspath(path.join(output_dir, 'rn_dict.json'))
+        with open(path.join(output_dir, 'rn_dict.json'), 'w') as f:
+            f.write(json.dumps(rn_dict))
+            logger.logv(abr.upper() + ' json location', path.abspath(f.name))
 
     # Get reactions from KEGG and pull cos produced
     sample_cos_produced = get_products_from_rns(sample_rns, rn_dict)
@@ -316,7 +323,7 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
     # read in compounds that were measured if available
     if compounds_loc is not None:
         cos_measured = list(read_in_ids(compounds_loc, name='Compounds', keep_separated=False).values())[0]
-        logger['compounds_loc'] = path.abspath(compounds_loc)
+        logger.logv('compounds_loc', path.abspath(compounds_loc))
     else:
         cos_measured = None
 
@@ -326,25 +333,27 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
     # get rid of any all false columns
     origin_table = origin_table[origin_table.columns[origin_table.sum().astype(bool)]]
     origin_table.to_csv(path.join(output_dir, 'origin_table.tsv'), sep='\t')
-    logger['Origin table location'] = path.abspath(path.join(output_dir, 'origin_table.tsv'))
+    logger.logv('Origin table location', path.abspath(path.join(output_dir, 'origin_table.tsv')))
 
     # make kegg mapper input if 2 or fewer samples
     if len(sample_cos_produced) <= 2:
         kegg_mapper_input = make_kegg_mapper_input(merge_dicts_of_lists(sample_kos, sample_cos_produced), cos_measured)
         kegg_mapper_input.to_csv(path.join(output_dir, 'kegg_mapper.tsv'), sep='\t')
-        logger['KEGG mapper location'] = path.abspath(path.join(output_dir, 'kegg_mapper.tsv'))
+        logger.logv('KEGG mapper location', path.abspath(path.join(output_dir, 'kegg_mapper.tsv')))
 
     # Get full set of compounds
     all_cos_produced = set([value for values in sample_cos_produced.values() for value in values])
-    logger['Number of cos produced across samples'] = len(all_cos_produced)
+    logger.logv('Number of cos produced across samples', len(all_cos_produced))
     if detected_only:
         all_cos_produced = set(all_cos_produced) | set(cos_measured)
-        logger['Number of cos produced and detected'] = len(all_cos_produced)
+        logger.logv('Number of cos produced and detected', len(all_cos_produced))
 
     # Get compound data from kegg
     co_dict = get_kegg_record_dict(all_cos_produced, parse_co, co_file_loc)
     if write_json:
-        open(path.join(output_dir, 'co_dict.json'), 'w').write(json.dumps(co_dict))
+        with open(path.join(output_dir, 'co_dict.json'), 'w') as f:
+            f.write(json.dumps(co_dict))
+            logger.logv('CO json location', path.abspath(f.name))
 
     # remove compounds without reactions if required
     if rxn_compounds_only:
@@ -356,7 +365,9 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
 
     # Make venn diagram
     if (compounds_loc is not None or len(sample_cos_produced) > 1) and len(sample_cos_produced) <= 2:
-        make_venn(sample_cos_produced, cos_measured, path.join(output_dir, 'venn.png'))
+        venn_file = path.join(output_dir, 'venn.png')
+        make_venn(sample_cos_produced, cos_measured, venn_file)
+        logger.logv('Venn diagram of predicted and detected cos location', path.abspath(venn_file))
 
     # Filter compounds down to only cos measured for cos produced and other cos produced
     if detected_only:
@@ -371,6 +382,10 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
     all_pathways = [pathway.replace('map', 'ko') for pathway in get_pathways_from_cos(co_dict)]
     pathway_dict = get_kegg_record_dict(all_pathways, parse_pathway, pathway_file_loc)
     pathway_to_compound_dict = get_pathway_to_co_dict(pathway_dict, no_glycan=False)
+    if write_json:
+        with open(path.join(output_dir, 'pathway_dict.json'), 'w') as f:
+            f.write(json.dumps(pathway_dict))
+            logger.logv('Pathway json location', path.abspath(f.name))
 
     # calculate enrichment
     pathway_enrichment_dfs = dict()
@@ -378,13 +393,12 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
         pathway_enrichment_df = calculate_enrichment(cos_produced, pathway_to_compound_dict)
         if pathway_enrichment_df is not None:
             pathway_enrichment_df.to_csv(path.join(output_dir, '%s_compound_pathway_enrichment.tsv' % sample), sep='\t')
-            logger['%s pathway enrichment'] = path.abspath(path.join(output_dir,
-                                                                     '%s_compound_pathway_enrichment.tsv' % sample))
+            logger.logv('{} pathway enrichment'.format(sample), path.abspath(path.join(output_dir, '{}_compound_pathway_enrichment.tsv'.format(sample))))
             pathway_enrichment_dfs[sample] = pathway_enrichment_df
 
     if len(pathway_enrichment_dfs) > 0:
         make_enrichment_clustermap(pathway_enrichment_dfs, 'adjusted probability',
                                    path.join(output_dir, 'enrichment_heatmap.png'))
-        logger['Enrichment clustermap location'] = path.abspath(path.join(output_dir, 'enrichment_heatmap.png'))
+        logger.logv('Enrichment clustermap location', path.abspath(path.join(output_dir, 'enrichment_heatmap.png')))
 
-    logger.output_log()
+    logger.end_log()
