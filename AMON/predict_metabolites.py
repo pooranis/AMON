@@ -315,7 +315,7 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
     if write_json:
         with open(path.join(output_dir, 'rn_dict.json'), 'w') as f:
             f.write(json.dumps(rn_dict))
-            logger.logv(abr.upper() + ' json location', path.abspath(f.name))
+            logger.logv('RN json location', path.abspath(f.name))
 
     # Get reactions from KEGG and pull cos produced
     sample_cos_produced = get_products_from_rns(sample_rns, rn_dict)
