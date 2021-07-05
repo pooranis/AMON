@@ -24,7 +24,7 @@ Then it can be installed via pip.
 
 - To install this fork:
   ```bash
-  python -m pip install git+https://github.com/pooranis/AMON.git@main
+  python -m pip install git+https://github.com/pooranis/AMON.git@master
   ```
 
 ### Alternative installation
