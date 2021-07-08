@@ -80,7 +80,6 @@ When the `other_gene_set` and/or `detected_compounds` parameters are given a ven
 
 #### Full help
 ```
-amon.py --help
 usage: amon.py [-h] -i GENE_SET -o OUTPUT_DIR [-e]
                [--detected_compounds DETECTED_COMPOUNDS]
                [--other_gene_set OTHER_GENE_SET]
@@ -92,46 +91,48 @@ usage: amon.py [-h] -i GENE_SET -o OUTPUT_DIR [-e]
                [--rn_file_loc RN_FILE_LOC] [--co_file_loc CO_FILE_LOC]
                [--pathway_file_loc PATHWAY_FILE_LOC] [--save_entries]
                [--overwrite]
-
 optional arguments:
   -h, --help            show this help message and exit
   -i GENE_SET, --gene_set GENE_SET
-                        KEGG KO's from bacterial community or organism of
-                        interest in the form of a white space separated list,
-                        a tsv or csv with KO ids as column names or a biom
-                        file with KO ids as observations (default: None)
-  -e, --ec_numbers      Instead of KEGG KO's, the 'gene_set' input file
-                        consists of KEGG EC numbers in the same format
-                        (default: False)
+                        KEGG KO's from bacterial community or organism of interest in the form of a
+                        white space separated list, a tsv or csv with KO ids as column names or a biom
+                        file with KO ids as observations. REQUIRED (default: None)
   -o OUTPUT_DIR, --output_dir OUTPUT_DIR
-                        directory to store output (default: None)
+                        directory to store output. REQUIRED (default: None)
+  -e, --ec_numbers      Instead of KEGG KO's, the 'gene_set' input files consist of KEGG EC numbers in
+                        the same format (default: False)
   --detected_compounds DETECTED_COMPOUNDS
-                        list of compounds detected via metabolomics (default:
-                        None)
+                        list of compounds detected via metabolomics (default: None)
   --other_gene_set OTHER_GENE_SET
-                        white space separated list of KEGG KO's from the host,
-                        another organism or other environment (default: None)
-  --detected_only       only use detected compounds in enrichment analysis
+                        white space separated list of KEGG KO's from the host, another organism or
+                        other environment (default: None)
+  --gene_set_name GENE_SET_NAME
+                        Name to use for first gene set (should have no spaces, underscore separated)
+                        (default: None)
+  --other_gene_set_name OTHER_GENE_SET_NAME
+                        Name to use for second gene set (should have no spaces, underscore separated)
+                        (default: None)
+  --keep_separated      If input in biom or tabular format keep samples separate for analysis
                         (default: False)
-  --rn_compound_only    only use compounds with associated reactions (default:
-                        False)
+  --samples_are_columns
+                        If data is in tabular format, by default genes are columns and samples rows,
+                        to indicate that samples are columns and genes are rows use this flag
+                        (default: False)
+  --detected_only       only use detected compounds in enrichment analysis (default: False)
+  --rn_compound_only    only use compounds with associated reactions (default: False)
+  --unique_only         only use compounds that are unique to a sample in enrichment (default: False)
   --ko_file_loc KO_FILE_LOC
-                        Location of ko file from KEGG FTP download (default:
-                        None)
+                        Location of ko file from KEGG FTP download (default: None)
   --ec_file_loc EC_FILE_LOC
                         Location of ec file from KEGG FTP download (default: None)
   --rn_file_loc RN_FILE_LOC
-                        Location of reaction file from KEGG FTP download
-                        (default: None)
+                        Location of reaction file from KEGG FTP download (default: None)
   --co_file_loc CO_FILE_LOC
-                        Location of compound file from KEGG FTP download
-                        (default: None)
+                        Location of compound file from KEGG FTP download (default: None)
   --pathway_file_loc PATHWAY_FILE_LOC
-                        Location of pathway file from KEGG FTP download
-                        (default: None)
-  --save_entries        Save json file of KEGG entries at all levels used in
-                        analysis for deeper analysis (default: False)
-  --overwrite           overwrite output directory if it exists (default:
-                        False)
+                        Location of pathway file from KEGG FTP download (default: None)
+  --save_entries        Save json file of KEGG entries at all levels used in analysis for deeper
+                        analysis (default: False)
+  --overwrite           overwrite output directory if it exists (default: False)
 
 ```

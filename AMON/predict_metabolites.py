@@ -12,6 +12,7 @@ from collections import defaultdict, OrderedDict
 from datetime import datetime
 import atexit
 
+
 from KEGG_parser.parsers import parse_ko, parse_rn, parse_co, parse_pathway
 from KEGG_parser.downloader import get_kegg_record_dict
 from .parse_ecs import parse_ec, get_rns_from_ecs
@@ -24,7 +25,7 @@ sns.set()
 class Logger:
     """"""
     def __init__(self, output):
-        self.output_file = open(output, mode='w')
+        self.output_file = open(output, mode='a')
         atexit.register(self.output_file.close)
         self.start_time = datetime.now()
         self.logv('start time', self.start_time)
@@ -288,8 +289,8 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
     # read in all kos and get records
     sample_kos = read_in_ids(kos_loc, keep_separated=keep_separated,
                              samples_are_columns=samples_are_columns, name=name1)
-
     logger.logv(abr + 's_loc', path.abspath(kos_loc))
+
 
     if other_kos_loc is not None:
         sample_kos.update(read_in_ids(other_kos_loc, keep_separated=keep_separated,
@@ -307,6 +308,8 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
 
     # get all reactions from kos
     sample_rns = get_rns(sample_kos, ko_dict)
+    sample1 = next(iter(sample_rns))
+    print(sample_rns[sample1], file=sys.stderr)
     all_rns = set([value for values in sample_rns.values() for value in values])
     logger.logv('Total number of reactions', len(all_rns))
 
