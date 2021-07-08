@@ -26,7 +26,7 @@ def split_reaction(current_dict, current_entry_name, current_entry_data):
         current_dict[current_entry_name] = list()
     if current_entry_data.startswith("(other)"):
         return current_dict
-    rxns = re.sub(r"[^\w ]+", "", current_entry_data).split()
+    rxns = re.findall(r'R\d+', current_entry_data)
     current_dict[current_entry_name].extend(rxns)
     return current_dict
 
