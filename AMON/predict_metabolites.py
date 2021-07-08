@@ -33,7 +33,7 @@ class Logger:
     def logv(self, key: str, value):
         """log a key, value pair"""
         print(key + ': ' + str(value), file=self.output_file, flush=True)
-    
+
     def end_log(self):
         """record finish time and elapsed time to log"""
         finish_time = datetime.now()
@@ -308,8 +308,6 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
 
     # get all reactions from kos
     sample_rns = get_rns(sample_kos, ko_dict)
-    sample1 = next(iter(sample_rns))
-    print(sample_rns[sample1], file=sys.stderr)
     all_rns = set([value for values in sample_rns.values() for value in values])
     logger.logv('Total number of reactions', len(all_rns))
 
