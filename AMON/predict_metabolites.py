@@ -371,7 +371,7 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
     # Make venn diagram
     if (compounds_loc is not None or len(sample_cos_produced) > 1) and len(sample_cos_produced) <= 2:
         venn_file = path.join(output_dir, 'venn.png')
-        make_venn(sample_cos_produced, cos_measured, venn_file)
+        make_venn(sample_cos_produced, cos_measured, venn_file, name1=name1, name2=name2)
         logger.logv('Venn diagram of predicted and detected cos location', path.abspath(venn_file))
 
     # Filter compounds down to only cos measured for cos produced and other cos produced
