@@ -8,7 +8,7 @@ import numpy as np
 from biom import load_table
 import seaborn as sns
 import json
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 from datetime import datetime
 import atexit
 
@@ -222,7 +222,7 @@ def get_unique_from_dict_of_lists(dict_of_lists):
     return unique_dict_of_lists
 
 
-def get_pathway_to_co_dict(pathway_dict, no_drug=True, no_glycan=True):
+def get_pathway_to_co_dict(pathway_dict, no_drug=True, no_glycan=True, pwy_to_id=False):
     pathway_to_co_dict = {pathway_record['NAME']: [compound[0] for compound in pathway_record['COMPOUND']]
                           for pathway_record in pathway_dict.values() if 'COMPOUND' in pathway_record}
     if no_drug:
@@ -231,7 +231,11 @@ def get_pathway_to_co_dict(pathway_dict, no_drug=True, no_glycan=True):
     if no_glycan:
         pathway_to_co_dict = {pathway: [co for co in cos if not co.startswith('G')]
                               for pathway, cos in pathway_to_co_dict.items()}
+    if not pwy_to_id:
     return pathway_to_co_dict
+    pathway_to_id_dict = {pathway_record['NAME']: pathway_record['ENTRY']
+                          for pathway_record in pathway_dict.values() if 'COMPOUND' in pathway_record}
+    return pathway_to_co_dict, pathway_to_id_dict
 
 
 def calculate_enrichment(cos, co_pathway_dict, min_pathway_size=10):
@@ -382,7 +386,7 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
     # Get pathway info from pathways in compounds
     all_pathways = [pathway.replace('map', 'ko') for pathway in get_pathways_from_cos(co_dict)]
     pathway_dict = get_kegg_record_dict(all_pathways, parse_pathway, pathway_file_loc)
-    pathway_to_compound_dict = get_pathway_to_co_dict(pathway_dict, no_glycan=False)
+    pathway_to_compound_dict, pathway_to_id_dict = get_pathway_to_co_dict(pathway_dict, no_glycan=False, pwy_to_id=True)
     if write_json:
         with open(path.join(output_dir, 'pathway_dict.json'), 'w') as f:
             f.write(json.dumps(pathway_dict))
@@ -393,8 +397,10 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
     for sample, cos_produced in sample_cos_produced.items():
         pathway_enrichment_df = calculate_enrichment(cos_produced, pathway_to_compound_dict)
         if pathway_enrichment_df is not None:
+            pathway_enrichment_df['id'] = pd.Series(pathway_to_id_dict)
             pathway_enrichment_df.to_csv(path.join(output_dir, '%s_compound_pathway_enrichment.tsv' % sample), sep='\t')
-            logger.logv('{} pathway enrichment'.format(sample), path.abspath(path.join(output_dir, '{}_compound_pathway_enrichment.tsv'.format(sample))))
+            logger.logv('{} pathway enrichment'.format(sample),
+                        path.abspath(path.join(output_dir, '{}_compound_pathway_enrichment.tsv'.format(sample))))
             pathway_enrichment_dfs[sample] = pathway_enrichment_df
 
     if len(pathway_enrichment_dfs) > 0:
