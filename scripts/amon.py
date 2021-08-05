@@ -55,7 +55,7 @@ if __name__ == '__main__':
         name1 = "gene_set_1"
     else:
         name1 = args.gene_set_name
-        name2 = args.other_gene_set_name
+    name2 = args.other_gene_set_name
     if not args.other_gene_set:
         name2 = None
 
