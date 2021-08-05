@@ -20,7 +20,7 @@ if __name__ == '__main__':
     parser.add_argument('--gene_set_name', help="Name to use for first gene set (should have no spaces, underscore "
                                                 "separated)")
     parser.add_argument('--other_gene_set_name', help="Name to use for second gene set (should have no spaces, "
-                                                      "underscore separated)")
+                                                      "underscore separated)", default="gene_set_2")
     # Options
     parser.add_argument('--keep_separated', help='If input in biom or tabular format keep samples separate for '
                                                  'analysis', action='store_true', default=False)
@@ -59,6 +59,8 @@ if __name__ == '__main__':
         name2 = "gene_set_2"
     else:
         name2 = args.other_gene_set_name
+    if not args.other_gene_set:
+        name2 = None
 
     keep_separated = args.keep_separated
     samples_are_columns = args.samples_are_columns

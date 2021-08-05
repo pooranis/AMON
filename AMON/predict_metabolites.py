@@ -275,13 +275,13 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
          keep_separated=False, samples_are_columns=False, detected_only=False, rxn_compounds_only=False,
          unique_only=True, ko_file_loc=None, rn_file_loc=None, co_file_loc=None, pathway_file_loc=None,
          write_json=False, overwrite=False):
+    main_args = locals()
     # create output dir to throw error quick
     makedirs(output_dir, exist_ok=overwrite)
     logger = Logger(path.join(output_dir, "AMON_log.txt"))
-
+    logger.logv("Args", json.dumps(main_args, indent=2))
     ## check if input is KO or EC
     if ec_numbers:
-        logger.logv('EC numbers?', ec_numbers)
         parse_first = parse_ec
         get_rns = get_rns_from_ecs
         abr = "ec"
