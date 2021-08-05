@@ -232,7 +232,7 @@ def get_pathway_to_co_dict(pathway_dict, no_drug=True, no_glycan=True, pwy_to_id
         pathway_to_co_dict = {pathway: [co for co in cos if not co.startswith('G')]
                               for pathway, cos in pathway_to_co_dict.items()}
     if not pwy_to_id:
-    return pathway_to_co_dict
+        return pathway_to_co_dict
     pathway_to_id_dict = {pathway_record['NAME']: pathway_record['ENTRY']
                           for pathway_record in pathway_dict.values() if 'COMPOUND' in pathway_record}
     return pathway_to_co_dict, pathway_to_id_dict
