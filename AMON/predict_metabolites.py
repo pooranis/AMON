@@ -269,6 +269,7 @@ def make_enrichment_clustermap(pathway_enrichment_dfs: dict, key, output_loc, mi
     _ = plt.setp(g.ax_heatmap.get_xticklabels(), rotation=340, fontsize=12, ha="left")
     _ = plt.setp(g.ax_heatmap.get_yticklabels(), rotation=0, fontsize=12)
     plt.savefig(output_loc, dpi=500, bbox_inches='tight')
+    return enrichment_p_df
 
 
 def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_loc=None, name1='gene_set_1', name2='gene_set_2',
@@ -404,8 +405,11 @@ def main(kos_loc, output_dir, ec_numbers=False, other_kos_loc=None, compounds_lo
             pathway_enrichment_dfs[sample] = pathway_enrichment_df
 
     if len(pathway_enrichment_dfs) > 0:
-        make_enrichment_clustermap(pathway_enrichment_dfs, 'adjusted probability',
+        heatmap_df = make_enrichment_clustermap(pathway_enrichment_dfs, 'adjusted probability',
                                    path.join(output_dir, 'enrichment_heatmap.png'))
         logger.logv('Enrichment clustermap location', path.abspath(path.join(output_dir, 'enrichment_heatmap.png')))
+        heatmap_df['id'] = pd.Series(pathway_to_id_dict)
+        heatmap_df.to_csv(path.join(output_dir, 'enrichment_heatmap_table.tsv'), sep='\t')
+        logger.logv('Table used to make enrichment clustermap', path.abspath(path.join(output_dir, 'enrichment_heatmap_table.tsv')))
 
     logger.end_log()
